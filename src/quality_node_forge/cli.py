@@ -6,6 +6,7 @@ import concurrent.futures
 import dataclasses
 import gzip
 import hashlib
+import ipaddress
 import json
 import math
 import os
@@ -57,6 +58,118 @@ SUPPORTED_TYPES = {
 }
 PREFERRED_TYPES = {"vless", "trojan", "hysteria2", "ss"}
 
+COUNTRY_NAMES: dict[str, str] = {
+    "US": "美国",
+    "JP": "日本",
+    "SG": "新加坡",
+    "HK": "香港",
+    "TW": "台湾",
+    "KR": "韩国",
+    "GB": "英国",
+    "DE": "德国",
+    "NL": "荷兰",
+    "FR": "法国",
+    "CA": "加拿大",
+    "AU": "澳大利亚",
+    "RU": "俄罗斯",
+    "TR": "土耳其",
+    "IN": "印度",
+    "BR": "巴西",
+    "PL": "波兰",
+    "SE": "瑞典",
+    "CH": "瑞士",
+    "IT": "意大利",
+    "ES": "西班牙",
+    "FI": "芬兰",
+    "IE": "爱尔兰",
+    "LU": "卢森堡",
+    "RO": "罗马尼亚",
+    "UA": "乌克兰",
+    "AE": "阿联酋",
+    "TH": "泰国",
+    "VN": "越南",
+    "ID": "印度尼西亚",
+    "MY": "马来西亚",
+    "PH": "菲律宾",
+    "MX": "墨西哥",
+    "AR": "阿根廷",
+    "ZA": "南非",
+    "IL": "以色列",
+    "IR": "伊朗",
+    "MD": "摩尔多瓦",
+    "CZ": "捷克",
+    "AT": "奥地利",
+    "BE": "比利时",
+    "DK": "丹麦",
+    "NO": "挪威",
+    "KZ": "哈萨克斯坦",
+    "PT": "葡萄牙",
+    "GR": "希腊",
+    "HU": "匈牙利",
+    "SK": "斯洛伐克",
+    "SI": "斯洛文尼亚",
+    "HR": "克罗地亚",
+    "RS": "塞尔维亚",
+    "BG": "保加利亚",
+    "LT": "立陶宛",
+    "LV": "拉脱维亚",
+    "EE": "爱沙尼亚",
+    "IS": "冰岛",
+    "BY": "白俄罗斯",
+    "CN": "中国",
+}
+
+COUNTRY_ALIASES: dict[str, str] = {
+    "美国": "US",
+    "美國": "US",
+    "USA": "US",
+    "United States": "US",
+    "日本": "JP",
+    "Japan": "JP",
+    "新加坡": "SG",
+    "Singapore": "SG",
+    "香港": "HK",
+    "Hong Kong": "HK",
+    "台湾": "TW",
+    "台灣": "TW",
+    "Taiwan": "TW",
+    "韩国": "KR",
+    "韓國": "KR",
+    "Korea": "KR",
+    "英国": "GB",
+    "英國": "GB",
+    "UK": "GB",
+    "United Kingdom": "GB",
+    "德国": "DE",
+    "德國": "DE",
+    "Germany": "DE",
+    "荷兰": "NL",
+    "荷蘭": "NL",
+    "Netherlands": "NL",
+    "法国": "FR",
+    "法國": "FR",
+    "France": "FR",
+    "加拿大": "CA",
+    "Canada": "CA",
+    "澳大利亚": "AU",
+    "澳洲": "AU",
+    "Australia": "AU",
+    "俄罗斯": "RU",
+    "俄羅斯": "RU",
+    "Russia": "RU",
+    "土耳其": "TR",
+    "Turkey": "TR",
+    "印度": "IN",
+    "India": "IN",
+    "巴西": "BR",
+    "Brazil": "BR",
+    "哈萨克斯坦": "KZ",
+    "Kazakhstan": "KZ",
+    "中国": "CN",
+    "中國": "CN",
+    "China": "CN",
+}
+
 
 @dataclasses.dataclass(slots=True)
 class Source:
@@ -74,6 +187,9 @@ class Candidate:
     source_weight: float
     fingerprint: str
     pre_score: float
+    original_name: str
+    region_code: str = "UN"
+    region_name: str = "未知"
 
 
 @dataclasses.dataclass(slots=True)
@@ -81,12 +197,15 @@ class TestResult:
     name: str
     source: str
     proxy_type: str
+    region_code: str
+    region_name: str
     avg_delay: float | None
     min_delay: float | None
     max_delay: float | None
     jitter: float | None
     success_count: int
     total_count: int
+    pre_score: float
     score: float
     error: str | None
     proxy: dict[str, Any]
@@ -118,6 +237,9 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--max-jitter-ms", type=int, default=700)
     run.add_argument("--min-success-rate", type=float, default=1.0)
     run.add_argument("--workers", type=int, default=18)
+    run.add_argument("--output-limit", type=int, default=80, help="main subscription candidate count")
+    run.add_argument("--min-fetched-sources", type=int, default=5)
+    run.add_argument("--min-candidates", type=int, default=120)
     run.add_argument(
         "--probe-url",
         action="append",
@@ -140,14 +262,25 @@ def run_pipeline(args: argparse.Namespace) -> int:
     print(f"[1/6] enabled sources: {len(sources)}", flush=True)
 
     fetched = fetch_sources(sources)
-    print(f"[2/6] fetched sources: {sum(1 for item in fetched if item[1])}/{len(fetched)}", flush=True)
+    fetched_count = sum(1 for item in fetched if item[1])
+    print(f"[2/6] fetched sources: {fetched_count}/{len(fetched)}", flush=True)
+    if fetched_count < args.min_fetched_sources:
+        raise SystemExit(
+            f"Too few sources fetched: {fetched_count}/{len(fetched)}; "
+            f"required at least {args.min_fetched_sources}."
+        )
 
     candidates = collect_candidates(fetched)
     print(f"[3/6] unique clean candidates: {len(candidates)}", flush=True)
     if not candidates:
         raise SystemExit("No valid proxy candidates found.")
+    if len(candidates) < args.min_candidates:
+        raise SystemExit(
+            f"Too few clean candidates: {len(candidates)}; required at least {args.min_candidates}."
+        )
 
     candidates = sorted(candidates, key=lambda c: c.pre_score, reverse=True)[: args.candidate_limit]
+    annotate_candidate_regions(candidates)
     rename_candidates(candidates)
     print(f"[4/6] candidates selected for testing: {len(candidates)}", flush=True)
 
@@ -157,12 +290,15 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 name=c.proxy["name"],
                 source=c.source,
                 proxy_type=str(c.proxy.get("type", "")),
+                region_code=c.region_code,
+                region_name=c.region_name,
                 avg_delay=None,
                 min_delay=None,
                 max_delay=None,
                 jitter=None,
                 success_count=0,
                 total_count=0,
+                pre_score=c.pre_score,
                 score=c.pre_score,
                 error=None,
                 proxy=c.proxy,
@@ -188,8 +324,9 @@ def run_pipeline(args: argparse.Namespace) -> int:
         )
 
     winners = select_winners(results, args.top, args.max_delay_ms, args.max_jitter_ms, args.min_success_rate)
-    print(f"[6/6] winners: {len(winners)}", flush=True)
-    emit_outputs(args.out, winners, results, sources, args)
+    subscription_pool = select_subscription_pool(results, args.output_limit, winners)
+    print(f"[6/6] strict winners: {len(winners)}; subscription candidates: {len(subscription_pool)}", flush=True)
+    emit_outputs(args.out, subscription_pool, winners, results, sources, args)
     return 0
 
 
@@ -244,6 +381,8 @@ def collect_candidates(fetched: list[tuple[Source, str | None, str | None]]) -> 
             normalized = normalize_proxy(proxy)
             if not normalized:
                 continue
+            original_name = str(normalized.pop("_original_name", normalized.get("name", ""))).strip()
+            region_code, region_name = detect_region(normalized, original_name)
             fp = proxy_fingerprint(normalized)
             if fp in seen:
                 continue
@@ -256,6 +395,9 @@ def collect_candidates(fetched: list[tuple[Source, str | None, str | None]]) -> 
                     source_weight=source.weight,
                     fingerprint=fp,
                     pre_score=score,
+                    original_name=original_name,
+                    region_code=region_code,
+                    region_name=region_name,
                 )
             )
     return candidates
@@ -576,13 +718,13 @@ def normalize_proxy(proxy: dict[str, Any]) -> dict[str, Any] | None:
     if not clean_host_fields(p):
         return None
 
-    name = str(p.get("name", "")).strip()
-    if not name:
-        name = f"{p_type}-{server}-{port}"
+    original_name = str(p.get("name", "")).strip()
+    name = original_name or f"{p_type}-{server}-{port}"
     name = sanitize_name(name)
     if BAD_NAME_RE.search(name):
         return None
     p["name"] = name
+    p["_original_name"] = original_name
     return p
 
 
@@ -676,14 +818,148 @@ def pre_score_proxy(proxy: dict[str, Any], source_weight: float) -> float:
     return score
 
 
+def detect_region(proxy: dict[str, Any], original_name: str) -> tuple[str, str]:
+    code = country_from_text(original_name) or country_from_text(str(proxy.get("name", "")))
+    if not code:
+        code = country_from_server_suffix(str(proxy.get("server", "")))
+    return country_display(code)
+
+
+def country_from_text(text: str) -> str | None:
+    if not text:
+        return None
+
+    flag_code = country_from_flag(text)
+    if flag_code:
+        return flag_code
+
+    lowered = text.lower()
+    for alias, code in COUNTRY_ALIASES.items():
+        if alias.lower() in lowered:
+            return normalize_country_code(code)
+
+    iso_codes = sorted(set(COUNTRY_NAMES) | {"UK"}, key=len, reverse=True)
+    pattern = r"(?<![A-Za-z])(" + "|".join(re.escape(code) for code in iso_codes) + r")(?![A-Za-z])"
+    match = re.search(pattern, text, flags=re.IGNORECASE)
+    if match:
+        return normalize_country_code(match.group(1))
+    return None
+
+
+def country_from_flag(text: str) -> str | None:
+    chars = list(text)
+    for first, second in zip(chars, chars[1:]):
+        a = ord(first)
+        b = ord(second)
+        if 0x1F1E6 <= a <= 0x1F1FF and 0x1F1E6 <= b <= 0x1F1FF:
+            code = chr(a - 0x1F1E6 + ord("A")) + chr(b - 0x1F1E6 + ord("A"))
+            return normalize_country_code(code)
+    return None
+
+
+def country_from_server_suffix(server: str) -> str | None:
+    server = server.strip().lower().rstrip(".")
+    if not server or re.fullmatch(r"\d{1,3}(?:\.\d{1,3}){3}", server):
+        return None
+    suffix = server.rsplit(".", 1)[-1].upper()
+    if suffix == "UK":
+        suffix = "GB"
+    if suffix in COUNTRY_NAMES:
+        return suffix
+    return None
+
+
+def normalize_country_code(code: str | None) -> str | None:
+    if not code:
+        return None
+    normalized = code.strip().upper()
+    if normalized == "UK":
+        normalized = "GB"
+    if len(normalized) == 2 and normalized.isalpha():
+        return normalized
+    return None
+
+
+def country_display(code: str | None) -> tuple[str, str]:
+    normalized = normalize_country_code(code)
+    if not normalized:
+        return "UN", "未知"
+    return normalized, COUNTRY_NAMES.get(normalized, normalized)
+
+
+def annotate_candidate_regions(candidates: list[Candidate]) -> None:
+    unresolved_hosts: list[str] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        if candidate.region_code != "UN":
+            continue
+        host = str(candidate.proxy.get("server", "")).strip()
+        if not should_lookup_region(host) or host in seen:
+            continue
+        seen.add(host)
+        unresolved_hosts.append(host)
+
+    host_regions = lookup_host_regions(unresolved_hosts)
+    for candidate in candidates:
+        if candidate.region_code != "UN":
+            continue
+        host = str(candidate.proxy.get("server", "")).strip()
+        if host in host_regions:
+            candidate.region_code, candidate.region_name = host_regions[host]
+
+
+def should_lookup_region(host: str) -> bool:
+    if not host:
+        return False
+    try:
+        address = ipaddress.ip_address(host)
+    except ValueError:
+        return "." in host
+    return not (address.is_private or address.is_loopback or address.is_link_local or address.is_multicast)
+
+
+def lookup_host_regions(hosts: list[str]) -> dict[str, tuple[str, str]]:
+    if not hosts:
+        return {}
+
+    regions: dict[str, tuple[str, str]] = {}
+    batches = [hosts[idx : idx + 100] for idx in range(0, len(hosts), 100)]
+    with httpx.Client(timeout=httpx.Timeout(25.0, connect=8.0), headers={"User-Agent": USER_AGENT}) as client:
+        for idx, batch in enumerate(batches):
+            try:
+                resp = client.post(
+                    "http://ip-api.com/batch?fields=status,message,country,countryCode,query",
+                    json=[{"query": host} for host in batch],
+                )
+                resp.raise_for_status()
+                data = resp.json()
+            except Exception as exc:  # noqa: BLE001
+                print(f"  region lookup skipped for {len(batch)} hosts: {exc}", flush=True)
+                continue
+            if not isinstance(data, list):
+                continue
+            for requested_host, item in zip(batch, data):
+                if not isinstance(item, dict) or item.get("status") != "success":
+                    continue
+                host = str(item.get("query") or "").strip()
+                code = normalize_country_code(str(item.get("countryCode") or ""))
+                if host and code:
+                    regions[host] = country_display(code)
+                    regions[requested_host] = country_display(code)
+            if idx < len(batches) - 1:
+                time.sleep(1.2)
+    return regions
+
+
 def rename_candidates(candidates: list[Candidate]) -> None:
     used: set[str] = set()
     for idx, c in enumerate(candidates, start=1):
         p_type = str(c.proxy.get("type", "node")).upper()
-        source_tag = source_short_name(c.source)
         server = re.sub(r"[^A-Za-z0-9.-]+", "-", str(c.proxy.get("server", "node"))).strip("-")
         port = str(c.proxy.get("port", ""))
-        base = f"{idx:03d}-{source_tag}-{p_type}-{server}-{port}"
+        region_code = c.region_code or "UN"
+        region_name = c.region_name or "未知"
+        base = f"{idx:03d}-{region_name}-{region_code}-{p_type}-{server}-{port}"
         name = base[:90]
         suffix = 2
         while name in used:
@@ -951,12 +1227,15 @@ def run_delay_tests(
             name=candidate.proxy["name"],
             source=candidate.source,
             proxy_type=str(candidate.proxy.get("type", "")),
+            region_code=candidate.region_code,
+            region_name=candidate.region_name,
             avg_delay=avg,
             min_delay=mn,
             max_delay=mx,
             jitter=jitter,
             success_count=len(delays),
             total_count=rounds,
+            pre_score=candidate.pre_score,
             score=score,
             error="; ".join(errors[:3]) if errors and not delays else None,
             proxy=candidate.proxy,
@@ -1004,17 +1283,59 @@ def select_winners(
     return viable[:top]
 
 
+def select_subscription_pool(
+    results: list[TestResult],
+    output_limit: int,
+    strict_winners: list[TestResult],
+) -> list[TestResult]:
+    limit = max(1, output_limit)
+    selected: list[TestResult] = []
+    used: set[str] = set()
+
+    def add(result: TestResult, *, allow_cn: bool = False) -> None:
+        if len(selected) >= limit or result.name in used:
+            return
+        if result.region_code == "CN" and not allow_cn:
+            return
+        selected.append(result)
+        used.add(result.name)
+
+    for result in strict_winners:
+        add(result)
+
+    alive = [r for r in results if r.success_count > 0]
+    alive.sort(key=lambda r: (r.success_rate, r.score, r.pre_score, -(r.avg_delay or 99999)), reverse=True)
+    for result in alive:
+        add(result)
+
+    # GitHub 云端网络和用户本地不同，所以主订阅会补入上游可信度高的候选，
+    # 交给 Clash Verge / FlClash 在用户本地继续测速筛选。
+    prefiltered = sorted(results, key=lambda r: (r.pre_score, r.success_count, r.score), reverse=True)
+    for result in prefiltered:
+        add(result)
+
+    if len(selected) < limit:
+        for result in prefiltered:
+            add(result, allow_cn=True)
+
+    return selected
+
+
 def emit_outputs(
     out: Path,
-    winners: list[TestResult],
+    subscription_pool: list[TestResult],
+    strict_winners: list[TestResult],
     all_results: list[TestResult],
     sources: list[Source],
     args: argparse.Namespace,
 ) -> None:
     generated = time.strftime("%Y-%m-%d %H:%M:%S %z")
-    proxies = [r.proxy for r in winners]
+    proxies = [clone_proxy_for_output(r.proxy) for r in subscription_pool]
+    strict_proxies = [clone_proxy_for_output(r.proxy) for r in strict_winners]
     names = [p["name"] for p in proxies]
+    strict_names = [p["name"] for p in strict_proxies]
     quality_config = build_quality_config(proxies, names)
+    strict_config = build_quality_config(strict_proxies, strict_names)
 
     (out / "quality.yaml").write_text(
         "# Generated by Quality Node Forge\n"
@@ -1026,11 +1347,29 @@ def emit_outputs(
         yaml.safe_dump({"proxies": proxies}, allow_unicode=True, sort_keys=False),
         encoding="utf-8",
     )
+    (out / "strict.yaml").write_text(
+        "# Generated by Quality Node Forge\n"
+        f"# Generated at: {generated}\n"
+        + yaml.safe_dump(strict_config, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+    )
+    (out / "strict-provider.yaml").write_text(
+        yaml.safe_dump({"proxies": strict_proxies}, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+    )
     (out / "tested.json").write_text(
         json.dumps([result_to_dict(r) for r in sorted(all_results, key=lambda x: x.score, reverse=True)], ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
-    (out / "report.md").write_text(build_report(winners, all_results, sources, args, generated), encoding="utf-8")
+    (out / "report.md").write_text(
+        build_report(subscription_pool, strict_winners, all_results, sources, args, generated),
+        encoding="utf-8",
+    )
+
+
+def clone_proxy_for_output(proxy: dict[str, Any]) -> dict[str, Any]:
+    clean = {k: v for k, v in proxy.items() if not str(k).startswith("_")}
+    return json.loads(json.dumps(clean, ensure_ascii=False))
 
 
 def build_quality_config(proxies: list[dict[str, Any]], names: list[str]) -> dict[str, Any]:
@@ -1038,24 +1377,24 @@ def build_quality_config(proxies: list[dict[str, Any]], names: list[str]) -> dic
         names = ["DIRECT"]
     groups = [
         {
-            "name": "Proxy",
+            "name": "节点选择",
             "type": "select",
-            "proxies": ["Auto", "Fallback", *names, "DIRECT"],
+            "proxies": ["自动优选", "故障转移", *names, "DIRECT"],
         },
         {
-            "name": "Auto",
+            "name": "自动优选",
             "type": "url-test",
-            "proxies": names,
-            "url": "https://www.gstatic.com/generate_204",
-            "interval": 300,
-            "tolerance": 50,
-        },
-        {
-            "name": "Fallback",
-            "type": "fallback",
-            "proxies": names,
+            "proxies": list(names),
             "url": "https://www.gstatic.com/generate_204",
             "interval": 180,
+            "tolerance": 80,
+        },
+        {
+            "name": "故障转移",
+            "type": "fallback",
+            "proxies": list(names),
+            "url": "https://www.gstatic.com/generate_204",
+            "interval": 120,
         },
     ]
     return {
@@ -1066,7 +1405,7 @@ def build_quality_config(proxies: list[dict[str, Any]], names: list[str]) -> dic
         "ipv6": False,
         "proxies": proxies,
         "proxy-groups": groups,
-        "rules": ["MATCH,Proxy"],
+        "rules": ["MATCH,节点选择"],
     }
 
 
@@ -1075,6 +1414,8 @@ def result_to_dict(r: TestResult) -> dict[str, Any]:
         "name": r.name,
         "source": r.source,
         "type": r.proxy_type,
+        "region_code": r.region_code,
+        "region_name": r.region_name,
         "avg_delay": r.avg_delay,
         "min_delay": r.min_delay,
         "max_delay": r.max_delay,
@@ -1082,13 +1423,15 @@ def result_to_dict(r: TestResult) -> dict[str, Any]:
         "success_count": r.success_count,
         "total_count": r.total_count,
         "success_rate": r.success_rate,
+        "pre_score": r.pre_score,
         "score": r.score,
         "error": r.error,
     }
 
 
 def build_report(
-    winners: list[TestResult],
+    subscription_pool: list[TestResult],
+    strict_winners: list[TestResult],
     all_results: list[TestResult],
     sources: list[Source],
     args: argparse.Namespace,
@@ -1096,27 +1439,29 @@ def build_report(
 ) -> str:
     alive = [r for r in all_results if r.success_count > 0]
     lines = [
-        "# Quality Node Forge Report",
+        "# 高质量节点订阅报告",
         "",
-        f"- Generated at: `{generated}`",
-        f"- Sources: `{len(sources)}`",
-        f"- Tested candidates: `{len(all_results)}`",
-        f"- Alive candidates: `{len(alive)}`",
-        f"- Winners: `{len(winners)}`",
-        f"- Max delay threshold: `{args.max_delay_ms} ms`",
-        f"- Max jitter threshold: `{args.max_jitter_ms} ms`",
-        f"- Min success rate: `{args.min_success_rate:.2f}`",
+        f"- 生成时间：`{generated}`",
+        f"- 抓取源数量：`{len(sources)}`",
+        f"- 云端测试候选：`{len(all_results)}`",
+        f"- 云端可连候选：`{len(alive)}`",
+        f"- 主订阅输出：`{len(subscription_pool)}`",
+        f"- 严格云端优选：`{len(strict_winners)}`",
+        f"- 云端延迟阈值：`{args.max_delay_ms} ms`",
+        f"- 云端抖动阈值：`{args.max_jitter_ms} ms`",
+        f"- 云端成功率阈值：`{args.min_success_rate:.2f}`",
         "",
-        "## Winners",
+        "## 主订阅候选",
         "",
-        "| # | Name | Type | Source | Success | Avg | Jitter | Score |",
-        "|---:|---|---|---|---:|---:|---:|---:|",
+        "| # | 节点名 | 国家/地区 | 协议 | 来源 | 云端成功 | 云端均延迟 | 抖动 | 评分 |",
+        "|---:|---|---|---|---|---:|---:|---:|---:|",
     ]
-    for idx, r in enumerate(winners, start=1):
+    for idx, r in enumerate(subscription_pool, start=1):
         lines.append(
-            "| {idx} | {name} | {typ} | {src} | {ok}/{total} | {avg} | {jitter} | {score:.1f} |".format(
+            "| {idx} | {name} | {region} | {typ} | {src} | {ok}/{total} | {avg} | {jitter} | {score:.1f} |".format(
                 idx=idx,
                 name=escape_md(r.name),
+                region=escape_md(f"{r.region_name}-{r.region_code}"),
                 typ=escape_md(r.proxy_type),
                 src=escape_md(r.source),
                 ok=r.success_count,
@@ -1129,9 +1474,31 @@ def build_report(
     lines.extend(
         [
             "",
-            "## Sources",
+            "## 严格云端优选",
             "",
-            "| Source | Weight | Notes |",
+            "| # | 节点名 | 国家/地区 | 协议 | 云端成功 | 云端均延迟 | 抖动 |",
+            "|---:|---|---|---|---:|---:|---:|",
+        ]
+    )
+    for idx, r in enumerate(strict_winners, start=1):
+        lines.append(
+            "| {idx} | {name} | {region} | {typ} | {ok}/{total} | {avg} | {jitter} |".format(
+                idx=idx,
+                name=escape_md(r.name),
+                region=escape_md(f"{r.region_name}-{r.region_code}"),
+                typ=escape_md(r.proxy_type),
+                ok=r.success_count,
+                total=r.total_count,
+                avg=f"{r.avg_delay:.0f} ms" if r.avg_delay is not None else "-",
+                jitter=f"{r.jitter:.0f} ms" if r.jitter is not None else "-",
+            )
+        )
+    lines.extend(
+        [
+            "",
+            "## 抓取源",
+            "",
+            "| 来源 | 权重 | 说明 |",
             "|---|---:|---|",
         ]
     )
@@ -1140,11 +1507,11 @@ def build_report(
     lines.extend(
         [
             "",
-            "## Notes",
+            "## 说明",
             "",
-            "- Public free nodes cannot guarantee privacy or long-term stability.",
-            "- `quality.yaml` can be imported directly into Clash Verge / FlClash.",
-            "- If winners are few, the current public pool is weak; this tool prefers quality over count.",
+            "- `quality.yaml` 是主订阅，适合直接导入 Clash Verge / FlClash，让你的本地设备自动测速。",
+            "- `strict.yaml` 是 GitHub 云端严格测通的结果，只能代表 GitHub 服务器那边可用，不代表你本地一定可用。",
+            "- 免费公开节点无法保证长期稳定，也无法保证隐私安全；重要账号、支付、银行、私密文件不要走免费节点。",
         ]
     )
     return "\n".join(lines) + "\n"

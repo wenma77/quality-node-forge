@@ -1,65 +1,65 @@
-# Sources are intentionally quality-focused.
-# Supported input formats:
-# - Clash/Mihomo YAML with a top-level "proxies" list.
-# - Plain URI subscriptions containing vless://, trojan://, vmess://, ss://, hysteria2://.
-# - Base64-encoded URI subscriptions.
+# 抓取源只选相对可信的公开源，宁可少一点，也尽量减少广告、重复和明显失效节点。
+# 支持的输入格式：
+# - 顶层包含 "proxies" 列表的 Clash/Mihomo YAML。
+# - 包含 vless://、trojan://、vmess://、ss://、hysteria2:// 的普通文本订阅。
+# - Base64 编码订阅。
 sources:
-  - name: Au1rxx verified feed
+  - name: Au1rxx 已验证源
     url: https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/clash.yaml
     weight: 1.35
     enabled: true
-    notes: "Hourly feed, sing-box real HTTP verification before publishing."
+    notes: "上游每小时更新，发布前做过真实 HTTP 验证。"
 
-  - name: VovaplusEXP VLESS secure
+  - name: VovaplusEXP VLESS 安全源
     url: https://raw.githubusercontent.com/VovaplusEXP/p-configs/main/Clash-Profiles/vless.yaml
     weight: 1.18
     enabled: true
-    notes: "Speed-tested Clash Meta profile, secure VLESS set."
+    notes: "上游整理的 VLESS 节点，作为高优先级候选。"
 
-  - name: VovaplusEXP Trojan
+  - name: VovaplusEXP Trojan 源
     url: https://raw.githubusercontent.com/VovaplusEXP/p-configs/main/Clash-Profiles/trojan.yaml
     weight: 1.12
     enabled: true
-    notes: "Speed-tested Clash Meta profile, Trojan set."
+    notes: "上游整理的 Trojan 节点，作为高优先级候选。"
 
-  - name: VovaplusEXP Shadowsocks
+  - name: VovaplusEXP Shadowsocks 源
     url: https://raw.githubusercontent.com/VovaplusEXP/p-configs/main/Clash-Profiles/ss.yaml
     weight: 1.03
     enabled: true
-    notes: "Speed-tested Clash Meta profile, SS set."
+    notes: "上游整理的 Shadowsocks 节点，作为补充候选。"
 
-  - name: awesome-vpn clash
+  - name: awesome-vpn Clash 源
     url: https://raw.githubusercontent.com/awesome-vpn/awesome-vpn/master/clash.yaml
     weight: 0.88
     enabled: true
-    notes: "Broad fallback source, lower trust than verified feeds."
+    notes: "覆盖面较广的备用源，可信度低于已验证源。"
 
-  - name: V2RayAggregator eternity
+  - name: V2RayAggregator 聚合源
     url: https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/Eternity.yml
     weight: 0.82
     enabled: true
-    notes: "Large fallback source filtered by speed upstream."
+    notes: "大型聚合备用源，只作为补充候选。"
 
-  - name: Pawdroid base64 feed
+  - name: Pawdroid Base64 源
     url: https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
     weight: 0.68
     enabled: true
-    notes: "Large public base64 feed; used only as a fallback and filtered strictly."
+    notes: "公开 Base64 源，只作为低优先级备用。"
 
-  - name: freefq base64 feed
+  - name: freefq Base64 源
     url: https://raw.githubusercontent.com/freefq/free/master/v2
     weight: 0.62
     enabled: true
-    notes: "Public base64 feed; useful for extra candidates after real testing."
+    notes: "公开 Base64 源，只作为低优先级备用。"
 
-  - name: xiaoji clashnodecc
+  - name: xiaoji clashnodecc 源
     url: https://raw.githubusercontent.com/xiaoji235/airport-free/main/clash/clashnodecc.txt
     weight: 0.58
     enabled: true
-    notes: "Public Clash feed; low trust, strict real testing required."
+    notes: "公开 Clash 源，可信度较低，必须经过筛选。"
 
-  - name: xiaoji v2rayshare
+  - name: xiaoji v2rayshare 源
     url: https://raw.githubusercontent.com/xiaoji235/airport-free/main/clash/v2rayshare.txt
     weight: 0.58
     enabled: true
-    notes: "Public Clash feed; low trust, strict real testing required."
+    notes: "公开 Clash 源，可信度较低，必须经过筛选。"

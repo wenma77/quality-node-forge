@@ -1,66 +1,125 @@
-# Quality Node Forge Report
+# 高质量节点订阅报告
 
-- Generated at: `2026-05-23 15:02:45 +0000`
-- Sources: `10`
-- Tested candidates: `717`
-- Alive candidates: `374`
-- Winners: `30`
-- Max delay threshold: `1800 ms`
-- Max jitter threshold: `700 ms`
-- Min success rate: `1.00`
+- 生成时间：`2026-05-23 23:34:55 +0800`
+- 抓取源数量：`10`
+- 云端测试候选：`360`
+- 云端可连候选：`8`
+- 主订阅输出：`80`
+- 严格云端优选：`3`
+- 云端延迟阈值：`1800 ms`
+- 云端抖动阈值：`700 ms`
+- 云端成功率阈值：`1.00`
 
-## Winners
+## 主订阅候选
 
-| # | Name | Type | Source | Success | Avg | Jitter | Score |
-|---:|---|---|---|---:|---:|---:|---:|
-| 1 | 004-AVF-VLESS-159.89.87.21-28190 | vless | Au1rxx verified feed | 3/3 | 67 ms | 31 ms | 1148.4 |
-| 2 | 005-AVF-VLESS-137.184.218.169-36925 | vless | Au1rxx verified feed | 3/3 | 78 ms | 22 ms | 1145.3 |
-| 3 | 109-AVF-SS-37.19.198.236-443 | ss | Au1rxx verified feed | 3/3 | 39 ms | 8 ms | 1135.0 |
-| 4 | 108-AVF-SS-37.19.198.243-443 | ss | Au1rxx verified feed | 3/3 | 39 ms | 12 ms | 1133.5 |
-| 5 | 111-AVF-SS-37.19.198.160-443 | ss | Au1rxx verified feed | 3/3 | 45 ms | 10 ms | 1130.8 |
-| 6 | 107-AVF-SS-37.19.198.244-443 | ss | Au1rxx verified feed | 3/3 | 44 ms | 13 ms | 1130.5 |
-| 7 | 110-AVF-SS-tinkered-pennies-puppies.freesocks.work-443 | ss | Au1rxx verified feed | 3/3 | 44 ms | 13 ms | 1130.5 |
-| 8 | 112-AVF-SS-108.181.57.93-8388 | ss | Au1rxx verified feed | 3/3 | 50 ms | 67 ms | 1108.4 |
-| 9 | 104-AVF-SS-79.127.200.169-990 | ss | Au1rxx verified feed | 3/3 | 87 ms | 24 ms | 1103.0 |
-| 10 | 376-AVF-VMESS-67.220.85.46-18000 | vmess | Au1rxx verified feed | 3/3 | 51 ms | 17 ms | 1098.0 |
-| 11 | 372-AVF-VMESS-67.220.95.3-18000 | vmess | Au1rxx verified feed | 3/3 | 39 ms | 38 ms | 1097.5 |
-| 12 | 114-AVF-SS-137.184.174.93-8080 | ss | Au1rxx verified feed | 3/3 | 110 ms | 20 ms | 1091.7 |
-| 13 | 085-AVF-SS-156.146.38.170-443 | ss | Au1rxx verified feed | 3/3 | 116 ms | 14 ms | 1090.5 |
-| 14 | 084-AVF-SS-156.146.38.167-443 | ss | Au1rxx verified feed | 3/3 | 118 ms | 17 ms | 1088.3 |
-| 15 | 082-AVF-SS-156.146.38.168-443 | ss | Au1rxx verified feed | 3/3 | 119 ms | 19 ms | 1087.1 |
-| 16 | 210-VVS-VLESS-cloudflare-ip.mofashi.ltd-443 | vless | VovaplusEXP VLESS secure | 3/3 | 79 ms | 61 ms | 1084.3 |
-| 17 | 383-AVC-VLESS-137.184.218.169-36925 | vless | awesome-vpn clash | 3/3 | 50 ms | 10 ms | 1080.7 |
-| 18 | 086-AVF-SS-149.28.255.6-816 | ss | Au1rxx verified feed | 3/3 | 130 ms | 30 ms | 1077.0 |
-| 19 | 103-AVF-SS-107.172.250.161-59556 | ss | Au1rxx verified feed | 3/3 | 117 ms | 70 ms | 1070.2 |
-| 20 | 113-AVF-SS-79.127.200.162-989 | ss | Au1rxx verified feed | 3/3 | 143 ms | 46 ms | 1064.5 |
-| 21 | 393-VS-SS-142.93.73.182-45389 | ss | VovaplusEXP Shadowsocks | 3/3 | 61 ms | 24 ms | 1059.6 |
-| 22 | 083-AVF-SS-156.146.38.169-443 | ss | Au1rxx verified feed | 3/3 | 148 ms | 93 ms | 1045.2 |
-| 23 | 378-AVF-VMESS-107.172.75.141-10086 | vmess | Au1rxx verified feed | 3/3 | 157 ms | 34 ms | 1034.0 |
-| 24 | 080-AVF-SS-173.244.56.6-443 | ss | Au1rxx verified feed | 3/3 | 210 ms | 31 ms | 1033.0 |
-| 25 | 099-AVF-SS-154.53.63.32-80 | ss | Au1rxx verified feed | 3/3 | 227 ms | 4 ms | 1032.8 |
-| 26 | 089-AVF-SS-154.53.57.143-80 | ss | Au1rxx verified feed | 3/3 | 229 ms | 7 ms | 1030.8 |
-| 27 | 091-AVF-SS-154.53.60.197-80 | ss | Au1rxx verified feed | 3/3 | 232 ms | 16 ms | 1026.2 |
-| 28 | 093-AVF-SS-94.72.127.55-80 | ss | Au1rxx verified feed | 3/3 | 232 ms | 25 ms | 1022.7 |
-| 29 | 358-AVF-VMESS-104.168.1.102-8222 | vmess | Au1rxx verified feed | 3/3 | 149 ms | 97 ms | 1019.9 |
-| 30 | 375-AVF-VMESS-82.198.246.233-180 | vmess | Au1rxx verified feed | 3/3 | 200 ms | 16 ms | 1016.6 |
+| # | 节点名 | 国家/地区 | 协议 | 来源 | 云端成功 | 云端均延迟 | 抖动 | 评分 |
+|---:|---|---|---|---|---:|---:|---:|---:|
+| 1 | 234-美国-US-VLESS-154.17.5.177-443 | 美国-US | vless | VovaplusEXP VLESS 安全源 | 3/3 | 969 ms | 48 ms | 599.7 |
+| 2 | 153-美国-US-VLESS-64.186.232.95-443 | 美国-US | vless | VovaplusEXP VLESS 安全源 | 3/3 | 973 ms | 69 ms | 589.8 |
+| 3 | 175-美国-US-VLESS-64.186.227.227-443 | 美国-US | vless | VovaplusEXP VLESS 安全源 | 3/3 | 1311 ms | 640 ms | 204.4 |
+| 4 | 134-美国-US-VLESS-103.91.219.252-443 | 美国-US | vless | VovaplusEXP VLESS 安全源 | 3/3 | 1431 ms | 1144 ms | -38.2 |
+| 5 | 131-美国-US-VLESS-64.186.225.13-8443 | 美国-US | vless | VovaplusEXP VLESS 安全源 | 3/3 | 1631 ms | 1982 ms | -441.5 |
+| 6 | 285-奥地利-AT-VLESS-31.14.17.188-443 | 奥地利-AT | vless | VovaplusEXP VLESS 安全源 | 3/3 | 3752 ms | 441 ms | -1072.3 |
+| 7 | 204-美国-US-VLESS-172.64.152.23-443 | 美国-US | vless | VovaplusEXP VLESS 安全源 | 1/3 | 979 ms | - | 10.8 |
+| 8 | 101-美国-US-SS-35.175.185.227-443 | 美国-US | ss | Au1rxx 已验证源 | 1/3 | 2709 ms | - | -930.8 |
+| 9 | 005-美国-US-VLESS-137.184.218.169-36925 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99983.6 |
+| 10 | 002-美国-US-VLESS-15.204.97.195-23576 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99983.6 |
+| 11 | 003-美国-US-VLESS-15.204.97.214-23576 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99983.6 |
+| 12 | 001-美国-US-VLESS-47.251.25.74-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99983.6 |
+| 13 | 004-美国-US-VLESS-159.89.87.21-28190 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99983.6 |
+| 14 | 020-美国-US-VLESS-104.18.13.149-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 15 | 007-美国-US-VLESS-162.159.153.231-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 16 | 019-美国-US-VLESS-167.68.5.191-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 17 | 011-加拿大-CA-VLESS-172.66.44.118-443 | 加拿大-CA | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 18 | 021-美国-US-VLESS-172.64.155.209-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 19 | 006-美国-US-VLESS-216.24.57.1-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 20 | 022-美国-US-VLESS-45.131.7.138-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 21 | 025-美国-US-VLESS-89.116.250.138-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 22 | 027-美国-US-VLESS-135.84.73.184-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 23 | 028-捷克-CZ-VLESS-195.85.23.138-2096 | 捷克-CZ | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 24 | 016-英国-GB-VLESS-77.75.199.43-443 | 英国-GB | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 25 | 009-加拿大-CA-VLESS-172.64.146.198-2096 | 加拿大-CA | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 26 | 008-美国-US-VLESS-209.102.207.120-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 27 | 018-英国-GB-VLESS-185.162.229.238-2096 | 英国-GB | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 28 | 012-美国-US-VLESS-217.163.76.254-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 29 | 024-美国-US-VLESS-45.40.153.191-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 30 | 010-美国-US-VLESS-199.34.228.41-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 31 | 033-加拿大-CA-VLESS-104.18.16.56-8443 | 加拿大-CA | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 32 | 034-美国-US-VLESS-104.18.12.149-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 33 | 014-美国-US-VLESS-185.16.110.238-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 34 | 017-美国-US-VLESS-135.84.64.226-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 35 | 023-英国-GB-VLESS-91.193.58.73-443 | 英国-GB | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 36 | 015-美国-US-VLESS-8.6.112.6-8443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 37 | 013-美国-US-VLESS-185.146.173.20-2053 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 38 | 036-美国-US-VLESS-135.84.72.18-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 39 | 026-美国-US-VLESS-104.17.101.139-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 40 | 035-加拿大-CA-VLESS-104.17.72.206-443 | 加拿大-CA | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 41 | 040-美国-US-VLESS-155.46.167.138-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 42 | 032-美国-US-VLESS-8.6.112.0-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 43 | 042-美国-US-VLESS-188.244.122.138-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 44 | 044-美国-US-VLESS-176.124.223.138-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 45 | 043-美国-US-VLESS-135.84.67.41-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 46 | 038-美国-US-VLESS-172.66.40.99-2083 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 47 | 052-美国-US-VLESS-135.84.64.222-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 48 | 054-加拿大-CA-VLESS-172.64.152.23-443 | 加拿大-CA | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 49 | 050-美国-US-VLESS-104.19.173.68-2053 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 50 | 048-美国-US-VLESS-104.21.7.193-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 51 | 029-哈萨克斯坦-KZ-VLESS-194.59.5.238-2096 | 哈萨克斯坦-KZ | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 52 | 046-加拿大-CA-VLESS-172.64.149.54-443 | 加拿大-CA | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 53 | 030-美国-US-VLESS-216.205.52.238-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 54 | 031-德国-DE-VLESS-185.158.133.138-2096 | 德国-DE | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 55 | 051-美国-US-VLESS-45.131.209.191-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 56 | 047-美国-US-VLESS-104.129.166.138-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 57 | 056-美国-US-VLESS-172.67.187.251-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 58 | 037-美国-US-VLESS-160.153.1.122-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 59 | 058-美国-US-VLESS-185.238.228.238-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 60 | 055-美国-US-VLESS-104.18.32.47-2053 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 61 | 039-美国-US-VLESS-104.18.12.149-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 62 | 041-美国-US-VLESS-135.84.74.155-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 63 | 053-美国-US-VLESS-185.156.19.238-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 64 | 049-美国-US-VLESS-5.10.247.138-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 65 | 057-美国-US-VLESS-192.200.160.238-2096 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.4 |
+| 66 | 059-美国-US-VLESS-up2-df6.pages.dev-443 | 美国-US | vless | Au1rxx 已验证源 | 0/3 | - | - | -99984.7 |
+| 67 | 062-美国-US-TROJAN-104.17.185.207-443 | 美国-US | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 68 | 064-加拿大-CA-TROJAN-188.114.96.3-443 | 加拿大-CA | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 69 | 060-加拿大-CA-TROJAN-162.159.36.20-443 | 加拿大-CA | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 70 | 065-法国-FR-TROJAN-104.20.6.134-443 | 法国-FR | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 71 | 061-美国-US-TROJAN-108.162.195.253-443 | 美国-US | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 72 | 070-加拿大-CA-TROJAN-172.64.152.23-443 | 加拿大-CA | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 73 | 075-美国-US-TROJAN-104.18.11.110-443 | 美国-US | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 74 | 069-加拿大-CA-TROJAN-104.18.32.47-443 | 加拿大-CA | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 75 | 072-美国-US-TROJAN-172.67.180.92-443 | 美国-US | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 76 | 079-美国-US-TROJAN-172.64.147.24-443 | 美国-US | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 77 | 071-加拿大-CA-TROJAN-104.18.12.149-443 | 加拿大-CA | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 78 | 063-白俄罗斯-BY-HYSTERIA2-185.106.96.231-443 | 白俄罗斯-BY | hysteria2 | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 79 | 066-未知-UN-TROJAN-sourceforge.net-443 | 未知-UN | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
+| 80 | 067-伊朗-IR-TROJAN-188.114.98.0-443 | 伊朗-IR | trojan | Au1rxx 已验证源 | 0/3 | - | - | -99985.4 |
 
-## Sources
+## 严格云端优选
 
-| Source | Weight | Notes |
+| # | 节点名 | 国家/地区 | 协议 | 云端成功 | 云端均延迟 | 抖动 |
+|---:|---|---|---|---:|---:|---:|
+| 1 | 234-美国-US-VLESS-154.17.5.177-443 | 美国-US | vless | 3/3 | 969 ms | 48 ms |
+| 2 | 153-美国-US-VLESS-64.186.232.95-443 | 美国-US | vless | 3/3 | 973 ms | 69 ms |
+| 3 | 175-美国-US-VLESS-64.186.227.227-443 | 美国-US | vless | 3/3 | 1311 ms | 640 ms |
+
+## 抓取源
+
+| 来源 | 权重 | 说明 |
 |---|---:|---|
-| Au1rxx verified feed | 1.35 | Hourly feed, sing-box real HTTP verification before publishing. |
-| VovaplusEXP VLESS secure | 1.18 | Speed-tested Clash Meta profile, secure VLESS set. |
-| VovaplusEXP Trojan | 1.12 | Speed-tested Clash Meta profile, Trojan set. |
-| VovaplusEXP Shadowsocks | 1.03 | Speed-tested Clash Meta profile, SS set. |
-| awesome-vpn clash | 0.88 | Broad fallback source, lower trust than verified feeds. |
-| V2RayAggregator eternity | 0.82 | Large fallback source filtered by speed upstream. |
-| Pawdroid base64 feed | 0.68 | Large public base64 feed; used only as a fallback and filtered strictly. |
-| freefq base64 feed | 0.62 | Public base64 feed; useful for extra candidates after real testing. |
-| xiaoji clashnodecc | 0.58 | Public Clash feed; low trust, strict real testing required. |
-| xiaoji v2rayshare | 0.58 | Public Clash feed; low trust, strict real testing required. |
+| Au1rxx 已验证源 | 1.35 | 上游每小时更新，发布前做过真实 HTTP 验证。 |
+| VovaplusEXP VLESS 安全源 | 1.18 | 上游整理的 VLESS 节点，作为高优先级候选。 |
+| VovaplusEXP Trojan 源 | 1.12 | 上游整理的 Trojan 节点，作为高优先级候选。 |
+| VovaplusEXP Shadowsocks 源 | 1.03 | 上游整理的 Shadowsocks 节点，作为补充候选。 |
+| awesome-vpn Clash 源 | 0.88 | 覆盖面较广的备用源，可信度低于已验证源。 |
+| V2RayAggregator 聚合源 | 0.82 | 大型聚合备用源，只作为补充候选。 |
+| Pawdroid Base64 源 | 0.68 | 公开 Base64 源，只作为低优先级备用。 |
+| freefq Base64 源 | 0.62 | 公开 Base64 源，只作为低优先级备用。 |
+| xiaoji clashnodecc 源 | 0.58 | 公开 Clash 源，可信度较低，必须经过筛选。 |
+| xiaoji v2rayshare 源 | 0.58 | 公开 Clash 源，可信度较低，必须经过筛选。 |
 
-## Notes
+## 说明
 
-- Public free nodes cannot guarantee privacy or long-term stability.
-- `quality.yaml` can be imported directly into Clash Verge / FlClash.
-- If winners are few, the current public pool is weak; this tool prefers quality over count.
+- `quality.yaml` 是主订阅，适合直接导入 Clash Verge / FlClash，让你的本地设备自动测速。
+- `strict.yaml` 是 GitHub 云端严格测通的结果，只能代表 GitHub 服务器那边可用，不代表你本地一定可用。
+- 免费公开节点无法保证长期稳定，也无法保证隐私安全；重要账号、支付、银行、私密文件不要走免费节点。

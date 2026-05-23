@@ -1,4 +1,4 @@
-name: Update quality subscription
+name: 更新高质量订阅
 
 on:
   workflow_dispatch:
@@ -18,24 +18,25 @@ jobs:
     timeout-minutes: 55
 
     steps:
-      - name: Checkout
+      - name: 拉取仓库
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: 配置 Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: 安装依赖
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install -e .
 
-      - name: Generate quality subscription
+      - name: 生成高质量订阅
         run: |
           python -m quality_node_forge run \
-            --candidate-limit 717 \
+            --candidate-limit 360 \
+            --output-limit 80 \
             --top 30 \
             --rounds 3 \
             --workers 24 \
@@ -44,16 +45,16 @@ jobs:
             --max-jitter-ms 700 \
             --min-success-rate 1.0
 
-      - name: Validate generated Mihomo config
+      - name: 校验 Mihomo 配置
         run: |
           chmod +x tools/mihomo/mihomo
           tools/mihomo/mihomo -t -d runtime -f outputs/quality.yaml
 
-      - name: Commit updated subscription
+      - name: 提交更新后的订阅
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add outputs/quality.yaml outputs/quality-provider.yaml outputs/report.md outputs/tested.json
+          git add outputs/quality.yaml outputs/quality-provider.yaml outputs/strict.yaml outputs/strict-provider.yaml outputs/report.md outputs/tested.json
           if git diff --cached --quiet; then
             echo "No output changes to commit."
           else
