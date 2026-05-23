@@ -1,0 +1,65 @@
+# Sources are intentionally quality-focused.
+# Supported input formats:
+# - Clash/Mihomo YAML with a top-level "proxies" list.
+# - Plain URI subscriptions containing vless://, trojan://, vmess://, ss://, hysteria2://.
+# - Base64-encoded URI subscriptions.
+sources:
+  - name: Au1rxx verified feed
+    url: https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/clash.yaml
+    weight: 1.35
+    enabled: true
+    notes: "Hourly feed, sing-box real HTTP verification before publishing."
+
+  - name: VovaplusEXP VLESS secure
+    url: https://raw.githubusercontent.com/VovaplusEXP/p-configs/main/Clash-Profiles/vless.yaml
+    weight: 1.18
+    enabled: true
+    notes: "Speed-tested Clash Meta profile, secure VLESS set."
+
+  - name: VovaplusEXP Trojan
+    url: https://raw.githubusercontent.com/VovaplusEXP/p-configs/main/Clash-Profiles/trojan.yaml
+    weight: 1.12
+    enabled: true
+    notes: "Speed-tested Clash Meta profile, Trojan set."
+
+  - name: VovaplusEXP Shadowsocks
+    url: https://raw.githubusercontent.com/VovaplusEXP/p-configs/main/Clash-Profiles/ss.yaml
+    weight: 1.03
+    enabled: true
+    notes: "Speed-tested Clash Meta profile, SS set."
+
+  - name: awesome-vpn clash
+    url: https://raw.githubusercontent.com/awesome-vpn/awesome-vpn/master/clash.yaml
+    weight: 0.88
+    enabled: true
+    notes: "Broad fallback source, lower trust than verified feeds."
+
+  - name: V2RayAggregator eternity
+    url: https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/Eternity.yml
+    weight: 0.82
+    enabled: true
+    notes: "Large fallback source filtered by speed upstream."
+
+  - name: Pawdroid base64 feed
+    url: https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
+    weight: 0.68
+    enabled: true
+    notes: "Large public base64 feed; used only as a fallback and filtered strictly."
+
+  - name: freefq base64 feed
+    url: https://raw.githubusercontent.com/freefq/free/master/v2
+    weight: 0.62
+    enabled: true
+    notes: "Public base64 feed; useful for extra candidates after real testing."
+
+  - name: xiaoji clashnodecc
+    url: https://raw.githubusercontent.com/xiaoji235/airport-free/main/clash/clashnodecc.txt
+    weight: 0.58
+    enabled: true
+    notes: "Public Clash feed; low trust, strict real testing required."
+
+  - name: xiaoji v2rayshare
+    url: https://raw.githubusercontent.com/xiaoji235/airport-free/main/clash/v2rayshare.txt
+    weight: 0.58
+    enabled: true
+    notes: "Public Clash feed; low trust, strict real testing required."
