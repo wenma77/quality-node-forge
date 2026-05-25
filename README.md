@@ -16,7 +16,7 @@ https://raw.githubusercontent.com/wenma77/quality-node-forge/main/outputs/qualit
 https://cdn.jsdelivr.net/gh/wenma77/quality-node-forge@main/outputs/quality.yaml
 ```
 
-严格云端测速版：
+严格版副本：
 
 ```text
 https://raw.githubusercontent.com/wenma77/quality-node-forge/main/outputs/strict.yaml
@@ -37,17 +37,17 @@ https://raw.githubusercontent.com/wenma77/quality-node-forge/main/outputs/strict
 
 这样在 Clash Verge / FlClash 里能直接看到国家或地区。
 
-## 自动更新
+## 更新方式
 
-GitHub Actions 每小时自动运行一次。你在 Clash Verge / FlClash 里更新订阅后，就会拿到最新生成的严格优选节点列表。
+主订阅应该尽量用你的本机网络测试后再发布。GitHub 服务器在国外，它测出来快的节点，在你本地可能全部 Timeout。
 
-如果想立刻刷新，可以在 GitHub 仓库的 Actions 页面手动运行“更新高质量订阅”。
+所以当前仓库不再让 GitHub Actions 每小时自动覆盖 `quality.yaml`。需要刷新时，应在本机运行一次严格测速，再把结果发布到同一个订阅链接。
 
 ## 输出文件
 
 - `outputs/quality.yaml`：主订阅，推荐导入 Clash Verge / FlClash。
 - `outputs/quality-provider.yaml`：主订阅的节点 provider 文件。
-- `outputs/strict.yaml`：GitHub 云端严格测通版。
+- `outputs/strict.yaml`：严格版副本。
 - `outputs/strict-provider.yaml`：严格版节点 provider 文件。
 - `outputs/report.md`：中文报告，能看本次抓取、测试和输出情况。
 - `outputs/tested.json`：完整测试数据，方便后续排查。

@@ -2,8 +2,6 @@ name: 更新高质量订阅
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "17 * * * *"
 
 permissions:
   contents: write
@@ -32,7 +30,7 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -e .
 
-      - name: 生成高质量订阅
+      - name: 生成云端测试订阅
         run: |
           python -m quality_node_forge run \
             --candidate-limit 500 \
@@ -51,7 +49,7 @@ jobs:
           chmod +x tools/mihomo/mihomo
           tools/mihomo/mihomo -t -d runtime -f outputs/quality.yaml
 
-      - name: 提交更新后的订阅
+      - name: 提交云端测试结果
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

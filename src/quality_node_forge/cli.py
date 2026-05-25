@@ -1422,17 +1422,17 @@ def build_report(
         "",
         f"- 生成时间：`{generated}`",
         f"- 抓取源数量：`{len(sources)}`",
-        f"- 云端测试候选：`{len(all_results)}`",
-        f"- 云端可连候选：`{len(alive)}`",
+        f"- 测试候选：`{len(all_results)}`",
+        f"- 可连候选：`{len(alive)}`",
         f"- 主订阅输出：`{len(subscription_pool)}`",
-        f"- 严格云端优选：`{len(strict_winners)}`",
-        f"- 云端延迟阈值：`{args.max_delay_ms} ms`",
-        f"- 云端抖动阈值：`{args.max_jitter_ms} ms`",
-        f"- 云端成功率阈值：`{args.min_success_rate:.2f}`",
+        f"- 严格优选：`{len(strict_winners)}`",
+        f"- 延迟阈值：`{args.max_delay_ms} ms`",
+        f"- 抖动阈值：`{args.max_jitter_ms} ms`",
+        f"- 成功率阈值：`{args.min_success_rate:.2f}`",
         "",
         "## 主订阅候选",
         "",
-        "| # | 节点名 | 国家/地区 | 协议 | 来源 | 云端成功 | 云端均延迟 | 抖动 | 评分 |",
+        "| # | 节点名 | 国家/地区 | 协议 | 来源 | 成功 | 平均延迟 | 抖动 | 评分 |",
         "|---:|---|---|---|---|---:|---:|---:|---:|",
     ]
     for idx, r in enumerate(subscription_pool, start=1):
@@ -1453,9 +1453,9 @@ def build_report(
     lines.extend(
         [
             "",
-            "## 严格云端优选",
+            "## 严格优选",
             "",
-            "| # | 节点名 | 国家/地区 | 协议 | 云端成功 | 云端均延迟 | 抖动 |",
+            "| # | 节点名 | 国家/地区 | 协议 | 成功 | 平均延迟 | 抖动 |",
             "|---:|---|---|---|---:|---:|---:|",
         ]
     )
@@ -1489,7 +1489,7 @@ def build_report(
             "## 说明",
             "",
             "- `quality.yaml` 是主订阅，只包含多轮测速全部成功、延迟和抖动达标的严格优选节点。",
-            "- `strict.yaml` 保留为严格版副本；GitHub 云端测通不代表你本地一定可用，但不会再为了凑数量补入未达标候选。",
+            "- `strict.yaml` 保留为严格版副本；不会再为了凑数量补入未达标候选。",
             "- 免费公开节点无法保证长期稳定，也无法保证隐私安全；重要账号、支付、银行、私密文件不要走免费节点。",
         ]
     )
