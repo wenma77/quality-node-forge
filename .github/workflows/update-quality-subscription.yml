@@ -33,16 +33,16 @@ jobs:
       - name: 生成云端测试订阅
         run: |
           python -m quality_node_forge run \
-            --candidate-limit 500 \
-            --output-limit 8 \
-            --top 8 \
+            --candidate-limit 3000 \
+            --output-limit 12 \
+            --top 12 \
             --rounds 3 \
             --workers 24 \
             --timeout-ms 3000 \
-            --max-delay-ms 1200 \
-            --max-jitter-ms 300 \
+            --max-delay-ms 1800 \
+            --max-jitter-ms 800 \
             --min-success-rate 1.0 \
-            --min-winners 1
+            --min-winners 2
 
       - name: 校验 Mihomo 配置
         run: |

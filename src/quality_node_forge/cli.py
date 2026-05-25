@@ -229,18 +229,18 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--out", type=Path, default=DEFAULT_OUTPUT)
     run.add_argument("--tools", type=Path, default=DEFAULT_TOOLS)
     run.add_argument("--runtime", type=Path, default=DEFAULT_RUNTIME)
-    run.add_argument("--top", type=int, default=8)
-    run.add_argument("--candidate-limit", type=int, default=500)
+    run.add_argument("--top", type=int, default=12)
+    run.add_argument("--candidate-limit", type=int, default=3000)
     run.add_argument("--rounds", type=int, default=3)
     run.add_argument("--timeout-ms", type=int, default=3000)
-    run.add_argument("--max-delay-ms", type=int, default=1200)
-    run.add_argument("--max-jitter-ms", type=int, default=300)
+    run.add_argument("--max-delay-ms", type=int, default=1800)
+    run.add_argument("--max-jitter-ms", type=int, default=800)
     run.add_argument("--min-success-rate", type=float, default=1.0)
     run.add_argument("--workers", type=int, default=18)
-    run.add_argument("--output-limit", type=int, default=8, help="main subscription candidate count")
-    run.add_argument("--min-fetched-sources", type=int, default=5)
+    run.add_argument("--output-limit", type=int, default=12, help="main subscription candidate count")
+    run.add_argument("--min-fetched-sources", type=int, default=8)
     run.add_argument("--min-candidates", type=int, default=120)
-    run.add_argument("--min-winners", type=int, default=1)
+    run.add_argument("--min-winners", type=int, default=2)
     run.add_argument(
         "--probe-url",
         action="append",
@@ -311,8 +311,6 @@ def run_pipeline(args: argparse.Namespace) -> int:
         print(f"[5/6] mihomo: {mihomo}", flush=True)
         probe_urls = args.probe_url or [
             "https://www.gstatic.com/generate_204",
-            "https://cp.cloudflare.com/generate_204",
-            "https://www.apple.com/library/test/success.html",
         ]
         results = test_with_mihomo(
             mihomo=mihomo,
@@ -721,7 +719,13 @@ def normalize_proxy(proxy: dict[str, Any]) -> dict[str, Any] | None:
     normalize_required_fields(p)
     if not has_required_fields(p):
         return None
+    if not clean_cipher(p):
+        return None
     if not clean_host_fields(p):
+        return None
+    if not clean_flow(p):
+        return None
+    if not clean_reality_opts(p):
         return None
 
     original_name = str(p.get("name", "")).strip()
@@ -757,6 +761,19 @@ def has_required_fields(proxy: dict[str, Any]) -> bool:
     return True
 
 
+def clean_cipher(proxy: dict[str, Any]) -> bool:
+    if str(proxy.get("type", "")) != "ss":
+        return True
+    cipher = str(proxy.get("cipher") or "").strip().lower()
+    if not cipher:
+        return False
+    aliases = {
+        "chacha20-poly1305": "chacha20-ietf-poly1305",
+    }
+    proxy["cipher"] = aliases.get(cipher, cipher)
+    return True
+
+
 def clean_host_fields(proxy: dict[str, Any]) -> bool:
     for key in ("servername", "sni", "host"):
         if key not in proxy:
@@ -778,6 +795,38 @@ def clean_host_fields(proxy: dict[str, Any]) -> bool:
                 headers["Host"] = host
             else:
                 headers.pop("Host", None)
+    return True
+
+
+def clean_flow(proxy: dict[str, Any]) -> bool:
+    flow = str(proxy.get("flow") or "").strip()
+    if not flow:
+        proxy.pop("flow", None)
+        return True
+    if flow != "xtls-rprx-vision":
+        return False
+    proxy["flow"] = flow
+    return True
+
+
+def clean_reality_opts(proxy: dict[str, Any]) -> bool:
+    reality = proxy.get("reality-opts")
+    if not isinstance(reality, dict):
+        return True
+
+    public_key = str(reality.get("public-key") or "").strip()
+    if public_key:
+        reality["public-key"] = public_key
+
+    short_id = str(reality.get("short-id") or "").strip()
+    if short_id:
+        if not re.fullmatch(r"[0-9a-fA-F]{2,16}", short_id):
+            return False
+        if len(short_id) % 2 != 0:
+            return False
+        reality["short-id"] = short_id
+    else:
+        reality["short-id"] = ""
     return True
 
 
@@ -1117,10 +1166,42 @@ def test_with_mihomo(
     workers: int,
     probe_urls: list[str],
 ) -> list[TestResult]:
+    batch_size = 500
+    all_results: list[TestResult] = []
+    for start in range(0, len(candidates), batch_size):
+        batch = candidates[start : start + batch_size]
+        print(
+            f"  mihomo batch {start // batch_size + 1}/{math.ceil(len(candidates) / batch_size)}: {len(batch)} candidates",
+            flush=True,
+        )
+        all_results.extend(
+            test_mihomo_batch(
+                mihomo=mihomo,
+                runtime=runtime,
+                candidates=batch,
+                rounds=rounds,
+                timeout_ms=timeout_ms,
+                workers=workers,
+                probe_urls=probe_urls,
+            )
+        )
+    return all_results
+
+
+def test_mihomo_batch(
+    mihomo: Path,
+    runtime: Path,
+    candidates: list[Candidate],
+    rounds: int,
+    timeout_ms: int,
+    workers: int,
+    probe_urls: list[str],
+) -> list[TestResult]:
     controller_port = free_port()
     mixed_port = free_port()
     config_path = runtime / "mihomo-test.yaml"
     controller = f"127.0.0.1:{controller_port}"
+    candidates = validate_mihomo_test_candidates(mihomo, runtime, config_path, list(candidates), mixed_port, controller)
     write_mihomo_test_config(config_path, candidates, mixed_port, controller)
 
     log_path = runtime / "mihomo.log"
@@ -1142,6 +1223,46 @@ def test_with_mihomo(
             proc.kill()
             proc.wait(timeout=8)
         log_fh.close()
+
+
+def validate_mihomo_test_candidates(
+    mihomo: Path,
+    runtime: Path,
+    config_path: Path,
+    candidates: list[Candidate],
+    mixed_port: int,
+    controller: str,
+) -> list[Candidate]:
+    removed: list[str] = []
+    max_removals = min(500, len(candidates))
+    for _ in range(max_removals + 1):
+        write_mihomo_test_config(config_path, candidates, mixed_port, controller)
+        kwargs: dict[str, Any] = {
+            "capture_output": True,
+            "text": True,
+            "encoding": "utf-8",
+            "errors": "replace",
+            "timeout": 30,
+        }
+        if os.name == "nt":
+            kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
+        proc = subprocess.run([str(mihomo), "-t", "-d", str(runtime), "-f", str(config_path)], **kwargs)
+        if proc.returncode == 0:
+            if removed:
+                print(f"  removed invalid mihomo nodes: {len(removed)}", flush=True)
+            return candidates
+        output = f"{proc.stdout}\n{proc.stderr}"
+        match = re.search(r"proxy\s+(\d+):", output, flags=re.IGNORECASE)
+        if not match:
+            raise RuntimeError("mihomo config validation failed:\n" + output[-1200:])
+        idx = int(match.group(1)) - 1
+        if idx < 0 or idx >= len(candidates):
+            raise RuntimeError("mihomo reported an invalid proxy index:\n" + output[-1200:])
+        bad = candidates.pop(idx)
+        removed.append(str(bad.proxy.get("name", f"proxy-{idx + 1}")))
+        if not candidates:
+            raise RuntimeError("No candidates left after mihomo config validation.")
+    raise RuntimeError(f"Too many invalid mihomo nodes removed: {len(removed)}")
 
 
 def write_mihomo_test_config(path: Path, candidates: list[Candidate], mixed_port: int, controller: str) -> None:

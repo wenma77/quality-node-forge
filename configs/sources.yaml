@@ -63,3 +63,45 @@ sources:
     weight: 0.58
     enabled: true
     notes: "公开 Clash 源，可信度较低，必须经过筛选。"
+
+  - name: Epodonios 大型聚合源
+    url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt
+    weight: 0.74
+    enabled: true
+    notes: "大型公开聚合源，只扩大候选范围，必须经过本机严格测速。"
+
+  - name: mfuu Base64 源
+    url: https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray
+    weight: 0.70
+    enabled: true
+    notes: "公开 Base64 源，只作为扩展候选。"
+
+  - name: ripaojiedian Clash 源
+    url: https://raw.githubusercontent.com/ripaojiedian/freenode/main/clash
+    weight: 0.72
+    enabled: true
+    notes: "公开 Clash 源，只作为扩展候选。"
+
+  - name: ermaozi Base64 源
+    url: https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/v2ray.txt
+    weight: 0.66
+    enabled: true
+    notes: "公开 Base64 源，只作为扩展候选。"
+
+  - name: ShadowsocksAggregator 聚合源
+    url: https://raw.githubusercontent.com/mahdibland/ShadowsocksAggregator/master/Eternity.yml
+    weight: 0.70
+    enabled: true
+    notes: "Shadowsocks 聚合源，只作为扩展候选。"
+
+  - name: SSAggregator 聚合源
+    url: https://raw.githubusercontent.com/mahdibland/SSAggregator/master/Eternity.yml
+    weight: 0.68
+    enabled: true
+    notes: "SS 聚合源，只作为扩展候选。"
+
+  - name: Leon SubCrawler VLESS 源
+    url: https://raw.githubusercontent.com/Leon406/SubCrawler/main/sub/share/vless
+    weight: 0.52
+    enabled: true
+    notes: "超大型 VLESS 候选源，权重较低，只在严格测速后入选。"
