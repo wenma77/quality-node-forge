@@ -24,9 +24,9 @@ https://raw.githubusercontent.com/wenma77/quality-node-forge/main/outputs/strict
 
 ## 现在的筛选逻辑
 
-`quality.yaml` 是主订阅。它不是只保留 GitHub 云端测通的极少数节点，而是保留一个小而干净的候选池，让 Clash Verge / FlClash 在你的电脑或手机本地继续测速。这样比“GitHub 测通就算好”更适合你实际使用。
+`quality.yaml` 是主订阅。现在它只保留严格入选节点：3 轮测速全部成功、平均延迟不高于 1200ms、抖动不高于 300ms。不会再为了凑数量补入“可能可用”的候选节点。
 
-`strict.yaml` 是 GitHub 云端严格测通的节点。它可以作为参考，但 GitHub 服务器的网络环境和你本地不同，所以它测通不代表你本地一定能用。
+`strict.yaml` 保留为严格版副本，方便以后对比或单独引用。GitHub 服务器的网络环境和你本地不同，所以它测通不代表你本地一定能用，但这种策略会明显减少订阅里一大片 Timeout 的情况。
 
 节点名称会尽量写成这种格式：
 
@@ -39,7 +39,7 @@ https://raw.githubusercontent.com/wenma77/quality-node-forge/main/outputs/strict
 
 ## 自动更新
 
-GitHub Actions 每小时自动运行一次。你在 Clash Verge / FlClash 里更新订阅后，就会拿到最新生成的节点列表。
+GitHub Actions 每小时自动运行一次。你在 Clash Verge / FlClash 里更新订阅后，就会拿到最新生成的严格优选节点列表。
 
 如果想立刻刷新，可以在 GitHub 仓库的 Actions 页面手动运行“更新高质量订阅”。
 
@@ -56,7 +56,7 @@ GitHub Actions 每小时自动运行一次。你在 Clash Verge / FlClash 里更
 
 ```powershell
 cd D:\OneDrive\Desktop\codex闲聊\quality-node-forge
-.\.venv\Scripts\python.exe -m quality_node_forge run --candidate-limit 360 --output-limit 80 --top 30
+.\.venv\Scripts\python.exe -m quality_node_forge run --candidate-limit 500 --output-limit 8 --top 8 --rounds 3 --timeout-ms 3000 --max-delay-ms 1200 --max-jitter-ms 300 --min-winners 1
 ```
 
 ## 重要说明

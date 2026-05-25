@@ -229,17 +229,18 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--out", type=Path, default=DEFAULT_OUTPUT)
     run.add_argument("--tools", type=Path, default=DEFAULT_TOOLS)
     run.add_argument("--runtime", type=Path, default=DEFAULT_RUNTIME)
-    run.add_argument("--top", type=int, default=30)
-    run.add_argument("--candidate-limit", type=int, default=260)
+    run.add_argument("--top", type=int, default=8)
+    run.add_argument("--candidate-limit", type=int, default=500)
     run.add_argument("--rounds", type=int, default=3)
-    run.add_argument("--timeout-ms", type=int, default=5000)
-    run.add_argument("--max-delay-ms", type=int, default=1800)
-    run.add_argument("--max-jitter-ms", type=int, default=700)
+    run.add_argument("--timeout-ms", type=int, default=3000)
+    run.add_argument("--max-delay-ms", type=int, default=1200)
+    run.add_argument("--max-jitter-ms", type=int, default=300)
     run.add_argument("--min-success-rate", type=float, default=1.0)
     run.add_argument("--workers", type=int, default=18)
-    run.add_argument("--output-limit", type=int, default=80, help="main subscription candidate count")
+    run.add_argument("--output-limit", type=int, default=8, help="main subscription candidate count")
     run.add_argument("--min-fetched-sources", type=int, default=5)
     run.add_argument("--min-candidates", type=int, default=120)
+    run.add_argument("--min-winners", type=int, default=1)
     run.add_argument(
         "--probe-url",
         action="append",
@@ -324,6 +325,11 @@ def run_pipeline(args: argparse.Namespace) -> int:
         )
 
     winners = select_winners(results, args.top, args.max_delay_ms, args.max_jitter_ms, args.min_success_rate)
+    if len(winners) < args.min_winners:
+        raise SystemExit(
+            f"Too few strict winners: {len(winners)}; required at least {args.min_winners}. "
+            "Keeping the previous subscription is safer than publishing an empty low-quality update."
+        )
     subscription_pool = select_subscription_pool(results, args.output_limit, winners)
     print(f"[6/6] strict winners: {len(winners)}; subscription candidates: {len(subscription_pool)}", flush=True)
     emit_outputs(args.out, subscription_pool, winners, results, sources, args)
@@ -1289,36 +1295,9 @@ def select_subscription_pool(
     strict_winners: list[TestResult],
 ) -> list[TestResult]:
     limit = max(1, output_limit)
-    selected: list[TestResult] = []
-    used: set[str] = set()
-
-    def add(result: TestResult, *, allow_cn: bool = False) -> None:
-        if len(selected) >= limit or result.name in used:
-            return
-        if result.region_code == "CN" and not allow_cn:
-            return
-        selected.append(result)
-        used.add(result.name)
-
-    for result in strict_winners:
-        add(result)
-
-    alive = [r for r in results if r.success_count > 0]
-    alive.sort(key=lambda r: (r.success_rate, r.score, r.pre_score, -(r.avg_delay or 99999)), reverse=True)
-    for result in alive:
-        add(result)
-
-    # GitHub 云端网络和用户本地不同，所以主订阅会补入上游可信度高的候选，
-    # 交给 Clash Verge / FlClash 在用户本地继续测速筛选。
-    prefiltered = sorted(results, key=lambda r: (r.pre_score, r.success_count, r.score), reverse=True)
-    for result in prefiltered:
-        add(result)
-
-    if len(selected) < limit:
-        for result in prefiltered:
-            add(result, allow_cn=True)
-
-    return selected
+    # 主订阅只放严格入选节点：多轮测速全部成功、延迟和抖动都达标。
+    # 不再补入“可能可用”的候选，宁可节点少，也不硬凑数量。
+    return strict_winners[:limit]
 
 
 def emit_outputs(
@@ -1509,8 +1488,8 @@ def build_report(
             "",
             "## 说明",
             "",
-            "- `quality.yaml` 是主订阅，适合直接导入 Clash Verge / FlClash，让你的本地设备自动测速。",
-            "- `strict.yaml` 是 GitHub 云端严格测通的结果，只能代表 GitHub 服务器那边可用，不代表你本地一定可用。",
+            "- `quality.yaml` 是主订阅，只包含多轮测速全部成功、延迟和抖动达标的严格优选节点。",
+            "- `strict.yaml` 保留为严格版副本；GitHub 云端测通不代表你本地一定可用，但不会再为了凑数量补入未达标候选。",
             "- 免费公开节点无法保证长期稳定，也无法保证隐私安全；重要账号、支付、银行、私密文件不要走免费节点。",
         ]
     )
