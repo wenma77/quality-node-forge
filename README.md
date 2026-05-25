@@ -1,6 +1,6 @@
 # 高质量节点订阅工具
 
-这是给 Clash Verge / FlClash 使用的自动订阅项目。它会定时抓取公开节点源，清洗重复和广告节点，给节点补上国家/地区名称，再输出可以直接导入客户端的订阅文件。
+这是给 Clash Verge / FlClash 使用的手动更新订阅项目。它会在你的本机网络环境下抓取公开节点源，清洗重复和广告节点，给节点补上国家/地区名称，再输出可以直接导入客户端的订阅文件。
 
 ## 订阅地址
 
@@ -56,8 +56,18 @@ https://raw.githubusercontent.com/wenma77/quality-node-forge/main/outputs/strict
 
 ```powershell
 cd D:\OneDrive\Desktop\codex闲聊\quality-node-forge
-.\.venv\Scripts\python.exe -m quality_node_forge run --candidate-limit 3000 --output-limit 12 --top 12 --rounds 3 --timeout-ms 3000 --max-delay-ms 1800 --max-jitter-ms 800 --min-winners 2
+.\.venv\Scripts\python.exe -m quality_node_forge run --candidate-limit 3000 --output-limit 12 --top 12 --rounds 3 --workers 32 --timeout-ms 3000 --max-delay-ms 1800 --max-jitter-ms 800 --min-success-rate 1.0 --min-winners 2
 ```
+
+## 双击手动更新
+
+在项目目录里双击：
+
+```text
+一键本机测速并更新订阅.cmd
+```
+
+它会用本机网络测速，至少筛出 2 个严格合格节点才上传到 GitHub。若本轮质量不够，会停止并保留上一版订阅。
 
 ## 重要说明
 
